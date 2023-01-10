@@ -1,0 +1,271 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Determine if a type implements a logical trait expression?, brought to you by @NikolaiVazquez!"><meta name="keywords" content="rust, rustlang, rust-lang, impls"><title>impls - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../normalize.css"><link rel="stylesheet" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../ayu.css" disabled><link rel="stylesheet" href="../dark.css" disabled><link rel="stylesheet" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="../crates.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../impls/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/nvzqz/impls/assets/logo.svg?sanitize=true" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../impls/index.html"><div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/nvzqz/impls/assets/logo.svg?sanitize=true" alt="logo"></div></a><h2 class="location"><a href="#">Crate impls</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 1.0.3</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#macros">Macros</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Crate <a class="mod" href="#">impls</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/impls/lib.rs.html#1-789">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><div align="center">
+    <a href="https://github.com/nvzqz/impls">
+        <img src="https://raw.githubusercontent.com/nvzqz/impls/assets/banner.svg?sanitize=true"
+             height="250px">
+    </a>
+    <br>
+    <a href="https://crates.io/crates/impls">
+        <img src="https://img.shields.io/crates/v/impls.svg" alt="Crates.io">
+        <img src="https://img.shields.io/crates/d/impls.svg" alt="Downloads">
+    </a>
+    <a href="https://github.com/nvzqz/impls/actions?query=workflow%3ACI">
+        <img src="https://github.com/nvzqz/impls/workflows/CI/badge.svg" alt="Build Status">
+    </a>
+    <img src="https://img.shields.io/badge/rustc-^1.37.0-blue.svg" alt="rustc ^1.37.0">
+    <br>
+    <a href="https://www.patreon.com/nvzqz">
+        <img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Become a Patron!" height="35">
+    </a>
+    <a href="https://www.paypal.me/nvzqz">
+        <img src="https://buymecoffee.intm.org/img/button-paypal-white.png" alt="Buy me a coffee" height="35">
+    </a>
+</div>
+<br>
+<p>Determine if a type implements a logical trait
+expression<sup><a href="#logical-trait-expression"><strong>?</strong></a></sup>, brought to you by
+<a href="https://twitter.com/NikolaiVazquez">@NikolaiVazquez</a>!</p>
+<p>This library defines <a href="macro.impls.html"><code>impls!</code></a>, a macro<sup><a href="#macro"><strong>?</strong></a></sup> that
+returns a <a href="https://doc.rust-lang.org/std/primitive.bool.html"><code>bool</code></a> indicating whether a type implements a boolean-like
+expression over a set of traits<sup><a href="#trait"><strong>?</strong></a></sup>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert!</span>(<span class="macro">impls!</span>(String: Clone &amp; !Copy &amp; Send &amp; Sync));</code></pre></div>
+<p>See <a href="#examples">“Examples”</a> for detailed use cases and, if you’re brave, see
+<a href="#trait-dependent-type-sizes">“Trait-Dependent Type Sizes”</a> for some cursed
+code.</p>
+<h2 id="index"><a href="#index">Index</a></h2>
+<ul>
+<li><a href="#reasoning">Reasoning</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#vocabulary">Vocabulary</a>
+<ul>
+<li><a href="#macro">Macro</a></li>
+<li><a href="#trait">Trait</a></li>
+<li><a href="#logical-trait-expression">Logical Trait Expression</a></li>
+</ul>
+</li>
+<li><a href="#examples">Examples</a>
+<ul>
+<li><a href="#constant-evaluation">Constant Evaluation</a></li>
+<li><a href="#precedence-and-nesting">Precedence and Nesting</a></li>
+<li><a href="#mutual-exclusion">Mutual Exclusion</a></li>
+<li><a href="#reference-types">Reference Types</a></li>
+<li><a href="#unsized-types">Unsized Types</a></li>
+<li><a href="#generic-types">Generic Types</a></li>
+<li><a href="#lifetimes">Lifetimes</a></li>
+<li><a href="#trait-dependent-type-sizes">Trait-Dependent Type Sizes</a></li>
+</ul>
+</li>
+<li><a href="#authors">Authors</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+<h2 id="reasoning"><a href="#reasoning">Reasoning</a></h2>
+<p>As a library author, it’s important to ensure that your API remains stable.
+Trait implementations are part of API stability. For example: if you
+accidentally introduce an inner type that makes your publicly-exposed type
+no longer be <a href="https://doc.rust-lang.org/std/marker/trait.Send.html"><code>Send</code></a> or <a href="https://doc.rust-lang.org/std/marker/trait.Send.html"><code>Sync</code></a>, you’ve now broken your API without
+noticing it! The most common case of this happening is adding a <a href="https://doc.rust-lang.org/std/primitive.pointer.html">raw
+pointer</a> (i.e. <code>*const T</code>, <code>*mut T</code>) as a type field.</p>
+<p>By checking situations like this with <a href="macro.impls.html"><code>impls!</code></a>, either at <a href="https://en.wikipedia.org/wiki/Compile_time">compile-time</a>
+or in a unit test, you can ensure that no API-breaking changes are made
+without noticing until it’s too late.</p>
+<h2 id="usage"><a href="#usage">Usage</a></h2>
+<p>This crate is available <a href="https://crates.io/crates/impls">on crates.io</a> and can be used by adding the
+following to your project’s <a href="https://doc.rust-lang.org/cargo/reference/manifest.html"><code>Cargo.toml</code></a>:</p>
+<div class="example-wrap"><pre class="language-toml"><code>[dependencies]
+impls = &quot;1&quot;
+</code></pre></div>
+<p>and this to your crate root (<code>main.rs</code> or <code>lib.rs</code>):</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#[macro_use]
+</span><span class="kw">extern crate </span>impls;</code></pre></div>
+<p>When using <a href="https://blog.rust-lang.org/2018/12/06/Rust-1.31-and-rust-2018.html#rust-2018">Rust 2018 edition</a>, the following import can help if
+having <code>#[macro_use]</code> is undesirable.</p>
+
+<div class="example-wrap edition"><div class='tooltip' data-edition="2018">ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>impls::impls;</code></pre></div>
+<h2 id="vocabulary"><a href="#vocabulary">Vocabulary</a></h2>
+<p>This documentation uses jargon that may be new to inexperienced Rust users.
+This section exists to make these terms easier to understand. Feel free to
+skip this section if these are already familiar to you.</p>
+<h3 id="macro"><a href="#macro">Macro</a></h3>
+<p>In Rust, macros are functions over the <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">abstract syntax tree (AST)</a>.
+They map input tokens to output tokens by performing some operation over
+them through a set of rules. Because of this, only their outputs are ever
+type-checked.</p>
+<p>If you wish to learn about implementing macros, I recommend:</p>
+<ul>
+<li><a href="https://danielkeep.github.io/tlborm/book/index.html">The Little Book of Rust Macros</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch19-06-macros.html">“Macros” - The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/stable/reference/macros.html">“Macros” - The Rust Reference</a></li>
+<li><a href="https://doc.rust-lang.org/stable/reference/macros-by-example.html">“Macros By Example” - The Rust Reference</a></li>
+</ul>
+<p>To use this crate, you do not need to know how macros are defined.</p>
+<h3 id="trait"><a href="#trait">Trait</a></h3>
+<p>In Rust, traits are a way of defining a generalized property. They should be
+thought of expressing what a type is capable of doing. For example: if a
+type implements <a href="https://doc.rust-lang.org/std/convert/trait.Into.html"><code>Into</code></a> for some type <code>T</code>, then we know it can be converted
+into <code>T</code> by just calling the <code>.into()</code> method on it.</p>
+<p>If you wish to learn about traits in detail, I recommend:</p>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch10-02-traits.html">“Traits: Defining Shared Behavior” - The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/stable/reference/items/traits.html">“Traits” - The Rust Reference</a></li>
+</ul>
+<h3 id="logical-trait-expression"><a href="#logical-trait-expression">Logical Trait Expression</a></h3>
+<p>In this crate, traits should be thought of as <a href="https://doc.rust-lang.org/std/primitive.bool.html"><code>bool</code></a>s where the condition
+is whether the given type implements the trait or not.</p>
+<p>An expression can be formed from these trait operations:</p>
+<ul>
+<li>
+<p>And (<code>&amp;</code>): also known as <a href="https://en.wikipedia.org/wiki/Logical_conjunction">logical conjunction</a>, this returns <code>true</code> if
+<strong>both</strong> operands are <code>true</code>. This is usually defined in Rust via the
+<a href="https://doc.rust-lang.org/std/ops/trait.BitAnd.html"><code>BitAnd</code></a> trait.</p>
+</li>
+<li>
+<p>Or (<code>|</code>): also known as <a href="https://en.wikipedia.org/wiki/Logical_disjunction">logical disjunction</a>, this returns <code>true</code> if
+<strong>either</strong> of two operands is <code>true</code>. This is usually defined in Rust via
+the <a href="https://doc.rust-lang.org/std/ops/trait.BitOr.html"><code>BitOr</code></a> trait.</p>
+</li>
+<li>
+<p>Exclusive-or (<code>^</code>): also known as <a href="https://en.wikipedia.org/wiki/Exclusive_disjunction">exclusive disjunction</a>, this returns
+<code>true</code> if <strong>only one</strong> of two operands is <code>true</code>. This is usually defined
+in Rust via the <a href="https://doc.rust-lang.org/std/ops/trait.BitXor.html"><code>BitXor</code></a> trait.</p>
+</li>
+<li>
+<p>Not (<code>!</code>): a negation that returns <code>false</code> if the operand is <code>true</code>, or
+<code>true</code> if the operand is <code>false</code>. This is usually defined in Rust via the
+<a href="https://doc.rust-lang.org/std/ops/trait.Not.html"><code>Not</code></a> trait.</p>
+</li>
+</ul>
+<p>See <a href="#precedence-and-nesting">“Precedence and Nesting”</a> for information
+about the order in which these operations are performed.</p>
+<h2 id="examples"><a href="#examples">Examples</a></h2>
+<p>This macro works in every type context. See below for use cases.</p>
+<h3 id="constant-evaluation"><a href="#constant-evaluation">Constant Evaluation</a></h3>
+<p>Because types are <a href="https://en.wikipedia.org/wiki/Compile_time">compile-time</a> constructs, the result of this macro can be
+used as a <code>const</code> value:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">const </span>IMPLS: bool = <span class="macro">impls!</span>(u8: From&lt;u32&gt;);</code></pre></div>
+<p>Using <a href="https://docs.rs/static_assertions"><code>static_assertions</code></a>, we can fail to compile if the trait expression
+evaluates to <code>false</code>:</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="macro">const_assert!</span>(<span class="macro">impls!</span>(<span class="kw-2">*const </span>u8: Send | Sync));</code></pre></div>
+<h3 id="precedence-and-nesting"><a href="#precedence-and-nesting">Precedence and Nesting</a></h3>
+<p>Trait operations abide by <a href="https://doc.rust-lang.org/reference/expressions.html#expression-precedence">Rust’s expression precedence</a>. To
+define a custom order of operations (e.g. left-to-right), simply nest the
+expressions with parentheses.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let </span>pre = <span class="macro">impls!</span>(u64:   From&lt;u8&gt; | From&lt;u16&gt;  ^ From&lt;u32&gt;  &amp; From&lt;u64&gt;);
+<span class="kw">let </span>ltr = <span class="macro">impls!</span>(u64: ((From&lt;u8&gt; | From&lt;u16&gt;) ^ From&lt;u32&gt;) &amp; From&lt;u64&gt;);
+
+<span class="macro">assert_eq!</span>(pre, <span class="bool-val">true </span>| <span class="bool-val">true </span>^ <span class="bool-val">true </span>&amp; <span class="bool-val">true</span>);
+<span class="macro">assert_ne!</span>(pre, ltr);</code></pre></div>
+<h3 id="mutual-exclusion"><a href="#mutual-exclusion">Mutual Exclusion</a></h3>
+<p>Because exclusive-or (<code>^</code>) is a trait operation, we can check that a type
+implements one of two traits, but not both:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct </span>T;
+
+<span class="kw">trait </span>Foo {}
+<span class="kw">trait </span>Bar {}
+
+<span class="kw">impl </span>Foo <span class="kw">for </span>T {}
+
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(T: Foo ^ Bar));</code></pre></div>
+<h3 id="reference-types"><a href="#reference-types">Reference Types</a></h3>
+<p>Something that’s surprising to many Rust users is that <a href="https://doc.rust-lang.org/std/primitive.reference.html"><code>&amp;mut T</code></a> <em>does not</em>
+implement <a href="https://doc.rust-lang.org/std/marker/trait.Copy.html"><code>Copy</code></a> <em>nor</em> <a href="https://doc.rust-lang.org/std/clone/trait.Clone.html"><code>Clone</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">assert!</span>(<span class="macro">impls!</span>(<span class="kw-2">&amp;mut </span>u32: !Copy &amp; !Clone));</code></pre></div>
+<p>Surely you’re thinking now that this macro must be broken, because you’ve
+been able to reuse <code>&amp;mut T</code> throughout your lifetime with Rust. This works
+because, in certain contexts, the compiler silently adds “re-borrows”
+(<code>&amp;mut *ref</code>) with a shorter lifetime and shadows the original. In reality,
+<code>&amp;mut T</code> is a move-only type.</p>
+<h3 id="unsized-types"><a href="#unsized-types">Unsized Types</a></h3>
+<p>There’s a variety of types in Rust that don’t implement <a href="https://doc.rust-lang.org/std/marker/trait.Sized.html"><code>Sized</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Slices store their size with their pointer.
+</span><span class="macro">assert!</span>(<span class="macro">impls!</span>(str:  !Sized));
+<span class="macro">assert!</span>(<span class="macro">impls!</span>([u8]: !Sized));
+
+<span class="comment">// Trait objects store their size in a vtable.
+</span><span class="kw">trait </span>Foo {}
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(<span class="kw">dyn </span>Foo: !Sized));
+
+<span class="comment">// Wrappers around unsized types are also unsized themselves.
+</span><span class="kw">struct </span>Bar([u8]);
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(Bar: !Sized));</code></pre></div>
+<h3 id="generic-types"><a href="#generic-types">Generic Types</a></h3>
+<p>When called from a generic function, the returned value is based on the
+constraints of the generic type:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::cell::Cell;
+
+<span class="kw">struct </span>Value&lt;T&gt; {
+    <span class="comment">// ...
+</span>}
+
+<span class="kw">impl</span>&lt;T: Send&gt; Value&lt;T&gt; {
+    <span class="kw">fn </span>do_stuff() {
+        <span class="macro">assert!</span>(<span class="macro">impls!</span>(Cell&lt;T&gt;: Send));
+        <span class="comment">// ...
+    </span>}
+}</code></pre></div>
+<p>Keep in mind that this can result in false negatives:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">const fn </span>is_copy&lt;T&gt;() -&gt; bool {
+    <span class="macro">impls!</span>(T: Copy)
+}
+
+<span class="macro">assert_ne!</span>(is_copy::&lt;u32&gt;(), <span class="macro">impls!</span>(u32: Copy));</code></pre></div>
+<h3 id="lifetimes"><a href="#lifetimes">Lifetimes</a></h3>
+<p>Traits with lifetimes are also supported:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">trait </span>Ref&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; Ref&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T {}
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="question-mark">?</span>Sized&gt; Ref&lt;<span class="lifetime">&#39;a</span>&gt; <span class="kw">for </span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw-2">mut </span>T {}
+
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str:      Ref&lt;<span class="lifetime">&#39;static</span>&gt;));
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span><span class="kw-2">mut </span>[u8]: Ref&lt;<span class="lifetime">&#39;static</span>&gt;));
+<span class="macro">assert!</span>(<span class="macro">impls!</span>(String:           !Ref&lt;<span class="lifetime">&#39;static</span>&gt;));</code></pre></div>
+<h3 id="trait-dependent-type-sizes"><a href="#trait-dependent-type-sizes">Trait-Dependent Type Sizes</a></h3>
+<p>This macro enables something really cool (read cursed) that couldn’t be done
+before: making a type’s size dependent on what traits it implements! Note
+that this probably is a bad idea and shouldn’t be used in production.</p>
+<p>Here <code>Foo</code> becomes 32 bytes for no other reason than it implementing
+<a href="https://doc.rust-lang.org/std/clone/trait.Clone.html"><code>Clone</code></a>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">const </span>SIZE: usize = <span class="number">32 </span>* (<span class="macro">impls!</span>(Foo: Clone) <span class="kw">as </span>usize);
+
+<span class="attribute">#[derive(Clone)]
+</span><span class="kw">struct </span>Foo([u8; SIZE]);
+
+<span class="macro">assert_eq!</span>(std::mem::size_of::&lt;Foo&gt;(), <span class="number">32</span>);</code></pre></div>
+<p>The <a href="https://doc.rust-lang.org/std/primitive.bool.html"><code>bool</code></a> returned from <a href="macro.impls.html"><code>impls!</code></a> gets casted to a <a href="https://doc.rust-lang.org/std/primitive.usize.html"><code>usize</code></a>, becoming 1
+or 0 depending on if it’s <code>true</code> or <code>false</code> respectively. If <code>true</code>, this
+becomes 32 × 1, which is 32. This then becomes the length of the byte array
+in <code>Foo</code>.</p>
+<h2 id="authors"><a href="#authors">Authors</a></h2>
+<ul>
+<li>
+<p>Nikolai Vazquez
+(GitHub: <a href="https://github.com/nvzqz">@nvzqz</a>, Twitter: <a href="https://twitter.com/NikolaiVazquez">@NikolaiVazquez</a>)</p>
+<p>Implemented the <code>impls!</code> macro with support for all logical operators and
+without the limitations of the initial <code>does_impl!</code> macro by Nadrieril.</p>
+</li>
+<li>
+<p>Nadrieril Feneanar
+(GitHub: <a href="https://github.com/Nadrieril">@Nadrieril</a>)</p>
+<p>Implemented the initial <code>does_impl!</code> macro in
+<a href="https://github.com/nvzqz/static-assertions-rs/pull/28">nvzqz/static-assertions-rs#28</a>
+upon which this crate was originally based.</p>
+</li>
+</ul>
+<h2 id="license"><a href="#license">License</a></h2>
+<p>This project is released under either:</p>
+<ul>
+<li><a href="https://github.com/nvzqz/impls/blob/master/LICENSE-MIT">MIT License</a></li>
+<li><a href="https://github.com/nvzqz/impls/blob/master/LICENSE-APACHE">Apache License (Version 2.0)</a></li>
+</ul>
+<p>at your choosing.</p>
+</div></details><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.impls.html" title="impls::impls macro">impls</a></div><div class="item-right docblock-short">Returns <code>true</code> if a type implements a logical trait expression.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="impls" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

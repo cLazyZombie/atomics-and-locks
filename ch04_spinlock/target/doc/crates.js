@@ -1,0 +1,1 @@
+window.ALL_CRATES = ["ch04_spinlock","impls","static_assertions"];
