@@ -10,8 +10,12 @@ use std::{
 };
 
 struct ArcData<T> {
-    data_ref_count: AtomicUsize,  // num of Arc
-    alloc_ref_count: AtomicUsize, // num of Weak + Arc
+    /// number of Arc
+    arc_count: AtomicUsize,
+
+    /// num of Weak + 1
+    weak_count: AtomicUsize,
+
     data: UnsafeCell<ManuallyDrop<T>>,
 }
 
@@ -26,8 +30,8 @@ impl<T> Arc<T> {
     pub fn new(data: T) -> Self {
         Arc {
             ptr: NonNull::from(Box::leak(Box::new(ArcData {
-                data_ref_count: AtomicUsize::new(1),
-                alloc_ref_count: AtomicUsize::new(1),
+                arc_count: AtomicUsize::new(1),
+                weak_count: AtomicUsize::new(1),
                 data: UnsafeCell::new(ManuallyDrop::new(data)),
             }))),
         }
@@ -40,16 +44,16 @@ impl<T> Arc<T> {
     pub fn get_mut(arc: &mut Self) -> Option<&mut T> {
         if arc
             .data()
-            .alloc_ref_count
+            .weak_count
             .compare_exchange(1, usize::MAX, Acquire, Relaxed)
             .is_err()
         {
             return None;
         }
 
-        let is_unique = arc.data().data_ref_count.load(Relaxed) == 1;
+        let is_unique = arc.data().arc_count.load(Relaxed) == 1;
 
-        arc.data().alloc_ref_count.store(1, Release);
+        arc.data().weak_count.store(1, Release);
         if !is_unique {
             return None;
         }
@@ -59,20 +63,20 @@ impl<T> Arc<T> {
     }
 
     pub fn downgrade(arc: &Self) -> Weak<T> {
-        let mut n = arc.data().alloc_ref_count.load(Relaxed);
+        let mut n = arc.data().weak_count.load(Relaxed);
         loop {
             if n == usize::MAX {
                 std::hint::spin_loop();
-                n = arc.data().alloc_ref_count.load(Relaxed);
+                n = arc.data().weak_count.load(Relaxed);
                 continue;
             }
 
             assert!(n < usize::MAX - 1);
 
-            if let Err(e) =
-                arc.data()
-                    .alloc_ref_count
-                    .compare_exchange_weak(n, n + 1, Acquire, Relaxed)
+            if let Err(e) = arc
+                .data()
+                .weak_count
+                .compare_exchange_weak(n, n + 1, Acquire, Relaxed)
             {
                 n = e;
                 continue;
@@ -93,7 +97,7 @@ impl<T> Deref for Arc<T> {
 
 impl<T> Clone for Arc<T> {
     fn clone(&self) -> Self {
-        if self.data().data_ref_count.fetch_add(1, Relaxed) > usize::MAX / 2 {
+        if self.data().arc_count.fetch_add(1, Relaxed) > usize::MAX / 2 {
             std::process::abort();
         }
         Arc { ptr: self.ptr }
@@ -102,7 +106,7 @@ impl<T> Clone for Arc<T> {
 
 impl<T> Drop for Arc<T> {
     fn drop(&mut self) {
-        if self.data().data_ref_count.fetch_sub(1, Release) == 1 {
+        if self.data().arc_count.fetch_sub(1, Release) == 1 {
             fence(Acquire);
 
             unsafe {
@@ -127,16 +131,16 @@ impl<T> Weak<T> {
     }
 
     pub fn upgrade(&self) -> Option<Arc<T>> {
-        let mut n = self.data().data_ref_count.load(Relaxed);
+        let mut n = self.data().arc_count.load(Relaxed);
         loop {
             if n == 0 {
                 return None;
             }
             assert!(n < usize::MAX);
-            if let Err(e) =
-                self.data()
-                    .data_ref_count
-                    .compare_exchange_weak(n, n + 1, Relaxed, Relaxed)
+            if let Err(e) = self
+                .data()
+                .arc_count
+                .compare_exchange_weak(n, n + 1, Relaxed, Relaxed)
             {
                 n = e;
                 continue;
@@ -148,7 +152,7 @@ impl<T> Weak<T> {
 
 impl<T> Clone for Weak<T> {
     fn clone(&self) -> Self {
-        if self.data().alloc_ref_count.fetch_add(1, Relaxed) > usize::MAX / 2 {
+        if self.data().weak_count.fetch_add(1, Relaxed) > usize::MAX / 2 {
             std::process::abort();
         }
         Weak { ptr: self.ptr }
@@ -157,7 +161,7 @@ impl<T> Clone for Weak<T> {
 
 impl<T> Drop for Weak<T> {
     fn drop(&mut self) {
-        if self.data().alloc_ref_count.fetch_sub(1, Release) == 1 {
+        if self.data().weak_count.fetch_sub(1, Release) == 1 {
             fence(Acquire);
             unsafe {
                 drop(Box::from_raw(self.ptr.as_ptr()));
