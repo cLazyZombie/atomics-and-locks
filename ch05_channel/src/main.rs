@@ -2,7 +2,7 @@ use std::{
     cell::UnsafeCell,
     mem::MaybeUninit,
     sync::atomic::{
-        AtomicU8,
+        AtomicBool,
         Ordering::{Acquire, Relaxed, Release},
     },
     thread,
@@ -10,79 +10,75 @@ use std::{
 
 pub struct Channel<T> {
     data: UnsafeCell<MaybeUninit<T>>,
-    state: AtomicU8,
+    ready: AtomicBool,
 }
 
-unsafe impl<T> Sync for Channel<T> {}
-
-const EMPTY: u8 = 0;
-const WRITING: u8 = 1;
-const READY: u8 = 2;
-const READING: u8 = 3;
+unsafe impl<T> Sync for Channel<T> where T: Send {}
 
 impl<T> Channel<T> {
     pub const fn new() -> Self {
         Self {
             data: UnsafeCell::new(MaybeUninit::uninit()),
-            state: AtomicU8::new(EMPTY),
+            ready: AtomicBool::new(false),
         }
     }
 
-    pub fn send(&self, message: T) {
-        if !self
-            .state
-            .compare_exchange(EMPTY, WRITING, Relaxed, Relaxed)
-            .is_ok()
-        {
-            panic!("channel is not empty");
-        }
-
-        unsafe {
-            (*self.data.get()).write(message);
-        }
-        self.state.store(READY, Release);
-    }
-
-    pub fn receive(&self) -> T {
-        if !self
-            .state
-            .compare_exchange(READY, READING, Acquire, Relaxed)
-            .is_ok()
-        {
-            panic!("channel is not ready");
-        }
-
-        unsafe { (*self.data.get()).assume_init_read() }
-    }
-
-    pub fn is_ready(&self) -> bool {
-        self.state.load(Relaxed) == READY
+    pub fn split(&mut self) -> (Sender<T>, Receiver<T>) {
+        (Sender { channel: self }, Receiver { channel: self })
     }
 }
 
 impl<T> Drop for Channel<T> {
     fn drop(&mut self) {
-        if *self.state.get_mut() == READY {
-            unsafe {
-                (*self.data.get()).assume_init_drop();
-            }
+        if *self.ready.get_mut() {
+            unsafe { (*self.data.get()).assume_init_drop() }
         }
     }
 }
 
+pub struct Sender<'a, T> {
+    channel: &'a Channel<T>,
+}
+
+impl<T> Sender<'_, T> {
+    pub fn send(self, message: T) {
+        unsafe { (*self.channel.data.get()).write(message) };
+        self.channel.ready.store(true, Release);
+    }
+}
+
+pub struct Receiver<'a, T> {
+    channel: &'a Channel<T>,
+}
+
+impl<T> Receiver<'_, T> {
+    pub fn receive(self) -> T {
+        if !self.channel.ready.swap(false, Acquire) {
+            panic!("channel is not ready");
+        }
+
+        unsafe { (*self.channel.data.get()).assume_init_read() }
+    }
+
+    pub fn is_ready(&self) -> bool {
+        self.channel.ready.load(Relaxed)
+    }
+}
+
 fn main() {
-    let channel = Channel::new();
+    let mut channel = Channel::<&'static str>::new();
+    let (sender, receiver) = channel.split();
     let t = thread::current();
     thread::scope(|s| {
         s.spawn(|| {
-            channel.send("hello, world");
+            sender.send("hello, world");
             t.unpark();
         });
 
-        while !channel.is_ready() {
+        while !receiver.is_ready() {
             thread::park();
         }
 
-        assert_eq!(channel.receive(), "hello, world");
+        assert_eq!(receiver.receive(), "hello, world");
     });
 }
