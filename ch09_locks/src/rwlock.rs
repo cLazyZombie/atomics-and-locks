@@ -8,6 +8,7 @@ use std::{
 pub struct RwLock<T> {
     /// number of readers, or u32::MAX if write-locked.
     state: AtomicU32,
+    writer_wake_counter: AtomicU32,
     value: UnsafeCell<T>,
 }
 
@@ -17,6 +18,7 @@ impl<T> RwLock<T> {
     pub const fn new(value: T) -> Self {
         Self {
             state: AtomicU32::new(0), // unlocked.
+            writer_wake_counter: AtomicU32::new(0),
             value: UnsafeCell::new(value),
         }
     }
@@ -38,8 +40,15 @@ impl<T> RwLock<T> {
     }
 
     pub fn write(&self) -> WriteGuard<T> {
-        while let Err(s) = self.state.compare_exchange(0, u32::MAX, Acquire, Relaxed) {
-            atomic_wait::wait(&self.state, s);
+        while self
+            .state
+            .compare_exchange(0, u32::MAX, Acquire, Relaxed)
+            .is_err()
+        {
+            let w = self.writer_wake_counter.load(Acquire);
+            if self.state.load(Relaxed) != 0 {
+                atomic_wait::wait(&self.writer_wake_counter, w);
+            }
         }
         WriteGuard { lock: self }
     }
@@ -60,7 +69,8 @@ impl<T> Deref for ReadGuard<'_, T> {
 impl<T> Drop for ReadGuard<'_, T> {
     fn drop(&mut self) {
         if self.lock.state.fetch_sub(1, Release) == 1 {
-            atomic_wait::wake_one(&self.lock.state);
+            self.lock.writer_wake_counter.fetch_add(1, Release);
+            atomic_wait::wake_one(&self.lock.writer_wake_counter);
         }
     }
 }
@@ -80,6 +90,8 @@ impl<T> Deref for WriteGuard<'_, T> {
 impl<T> Drop for WriteGuard<'_, T> {
     fn drop(&mut self) {
         self.lock.state.store(0, Release);
+        self.lock.writer_wake_counter.fetch_add(1, Release);
+        atomic_wait::wake_one(&self.lock.writer_wake_counter);
         atomic_wait::wake_all(&self.lock.state);
     }
 }
